@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Kelas 5A - All in One</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f9ff;
+        }
+
+        .student-card {
+            transition: all 0.2s ease;
+        }
+
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .tab-active {
+            background-color: white;
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+            font-weight: bold;
+        }
+
+        .tab-inactive {
+            background-color: transparent;
+            color: #9ca3af;
+            font-weight: normal;
+        }
+
+        .subject-card:hover {
+            transform: scale(1.02);
+            border-color: #3b82f6;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        @keyframes pulse-soft {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .animate-pulse-soft {
+            animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen pb-10">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 shadow-lg sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold"><i class="fas fa-school mr-2"></i>Kelas 5A Digital</h1>
+                <p class="text-blue-100 text-sm">Absensi • Nilai • Bank Materi</p>
+            </div>
+
+            <div class="flex items-center bg-white/20 backdrop-blur-sm rounded-lg p-2">
+                <input type="date" id="datePicker"
+                    class="bg-transparent text-white border-none outline-none font-semibold cursor-pointer appearance-none">
+                <i class="fas fa-calendar-alt ml-2 pointer-events-none"></i>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 mt-6">
+
+        <!-- Tab Navigation -->
+        <div class="flex bg-gray-200 rounded-t-xl p-1 gap-1 mb-0 overflow-x-auto">
+            <button onclick="switchTab('attendance')" id="tab-attendance"
+                class="flex-1 py-3 rounded-t-lg text-center transition-all tab-active whitespace-nowrap px-4">
+                <i class="fas fa-user-check mr-2"></i> Absensi
+            </button>
+            <button onclick="switchTab('grades')" id="tab-grades"
+                class="flex-1 py-3 rounded-t-lg text-center transition-all tab-inactive whitespace-nowrap px-4">
+                <i class="fas fa-calculator mr-2"></i> Nilai
+            </button>
+            <button onclick="switchTab('materials')" id="tab-materials"
+                class="flex-1 py-3 rounded-t-lg text-center transition-all tab-inactive whitespace-nowrap px-4">
+                <i class="fas fa-book-open mr-2"></i> Bank Materi
+            </button>
+        </div>
+
+        <!-- SECTION 1: ATTENDANCE (ABSENSI) -->
+        <div id="attendanceSection">
+            <!-- Summary Cards -->
+            <div class="bg-white p-4 rounded-b-xl shadow mb-6 border-t border-gray-100">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-green-50 p-3 rounded-lg border border-green-200 text-center">
+                        <div class="text-green-600 text-xs font-bold uppercase">Hadir</div>
+                        <div class="text-2xl font-bold text-gray-800" id="countHadir">0</div>
+                    </div>
+                    <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-center">
+                        <div class="text-yellow-600 text-xs font-bold uppercase">Sakit</div>
+                        <div class="text-2xl font-bold text-gray-800" id="countSakit">0</div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 text-center">
+                        <div class="text-blue-600 text-xs font-bold uppercase">Izin</div>
+                        <div class="text-2xl font-bold text-gray-800" id="countIzin">0</div>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-lg border border-red-200 text-center">
+                        <div class="text-red-600 text-xs font-bold uppercase">Alpha</div>
+                        <div class="text-2xl font-bold text-gray-800" id="countAlpha">0</div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="markAllPresent()"
+                        class="bg-green-100 text-green-700 hover:bg-green-200 px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center">
+                        <i class="fas fa-check-double mr-2"></i> Semua Hadir
+                    </button>
+                    <button onclick="resetToday('attendance')"
+                        class="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-lg font-semibold text-sm transition flex items-center">
+                        <i class="fas fa-undo mr-2"></i> Reset
+                    </button>
+                    <button onclick="copyAttendanceToClipboard()"
+                        class="ml-auto bg-indigo-600 text-white hover:bg-indigo-700 px-6 py-2 rounded-lg font-semibold text-sm shadow-md transition flex items-center">
+                        <i class="fab fa-whatsapp mr-2"></i> Salin Absen
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="hidden md:flex bg-gray-100 p-3 text-sm font-semibold text-gray-600 border-b">
+                    <div class="w-10 text-center">No</div>
+                    <div class="flex-1">Nama Siswa</div>
+                    <div class="flex-1 text-center">Status Kehadiran</div>
+                </div>
+                <div id="studentList" class="divide-y divide-gray-100"></div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: GRADES (NILAI) -->
+        <div id="gradeSection" class="hidden">
+            <div class="bg-white p-4 rounded-b-xl shadow mb-6 border-t border-gray-100">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="text-sm text-gray-600">
+                        <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                        Isi Benar & Salah. Sistem menghitung nilai otomatis.
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="resetToday('grades')"
+                            class="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-lg font-semibold text-sm transition flex-1 md:flex-none text-center">
+                            <i class="fas fa-trash-alt mr-2"></i> Hapus
+                        </button>
+                        <button onclick="copyGradesToClipboard()"
+                            class="bg-purple-600 text-white hover:bg-purple-700 px-6 py-2 rounded-lg font-semibold text-sm shadow-md transition flex-1 md:flex-none text-center justify-center flex items-center">
+                            <i class="fab fa-whatsapp mr-2"></i> Salin Nilai
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gray-100 p-3 text-sm font-semibold text-gray-600 border-b flex items-center">
+                    <div class="w-8 md:w-10 text-center">No</div>
+                    <div class="w-32 md:flex-1">Nama</div>
+                    <div class="flex-1 text-center grid grid-cols-3 gap-2">
+                        <span class="text-green-600 text-xs md:text-sm">Benar</span>
+                        <span class="text-red-600 text-xs md:text-sm">Salah</span>
+                        <span class="text-blue-700 font-bold text-xs md:text-sm">NILAI</span>
+                    </div>
+                </div>
+                <div id="gradeList" class="divide-y divide-gray-100"></div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: MATERIALS (BANK MATERI) -->
+        <div id="materialSection" class="hidden">
+            <div class="bg-white p-6 rounded-b-xl shadow mb-6 border-t border-gray-100">
+
+                <!-- Navigation Breadcrumb (Visible when subject selected) -->
+                <div id="materialNav" class="hidden flex items-center gap-2 mb-4 text-sm">
+                    <button onclick="closeSubject()" class="text-gray-500 hover:text-blue-600 font-medium">
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali ke Menu
+                    </button>
+                    <span class="text-gray-300">/</span>
+                    <span id="navSubjectTitle" class="text-gray-800 font-bold">Subject</span>
+                </div>
+
+                <!-- Subject Grid (Selection Menu) -->
+                <div id="subjectGrid" class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                    <button onclick="showSubject('IPAS')"
+                        class="subject-card p-4 rounded-xl border-2 border-green-100 bg-green-50 text-green-700 hover:bg-green-100 flex flex-col items-center justify-center gap-2 h-24">
+                        <i class="fas fa-leaf text-2xl"></i>
+                        <span class="font-bold">IPAS</span>
+                    </button>
+                    <button onclick="showSubject('MATEMATIKA')"
+                        class="subject-card p-4 rounded-xl border-2 border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 flex flex-col items-center justify-center gap-2 h-24">
+                        <i class="fas fa-calculator text-2xl"></i>
+                        <span class="font-bold">Matematika</span>
+                    </button>
+                    <button onclick="showSubject('BINDONESIA')"
+                        class="subject-card p-4 rounded-xl border-2 border-red-100 bg-red-50 text-red-700 hover:bg-red-100 flex flex-col items-center justify-center gap-2 h-24">
+                        <i class="fas fa-book text-2xl"></i>
+                        <span class="font-bold">B. Indonesia</span>
+                    </button>
+                    <button onclick="showSubject('SEJARAH')"
+                        class="subject-card p-4 rounded-xl border-2 border-yellow-100 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 flex flex-col items-center justify-center gap-2 h-24">
+                        <i class="fas fa-landmark text-2xl"></i>
+                        <span class="font-bold">Sejarah</span>
+                    </button>
+                    <button onclick="showSubject('BJAWA')"
+                        class="subject-card p-4 rounded-xl border-2 border-orange-100 bg-orange-50 text-orange-700 hover:bg-orange-100 flex flex-col items-center justify-center gap-2 h-24">
+                        <i class="fas fa-theater-masks text-2xl"></i>
+                        <span class="font-bold">B. Jawa</span>
+                    </button>
+                    <button onclick="showSubject('SENIBUDAYA')"
+                        class="subject-card p-4 rounded-xl border-2 border-purple-100 bg-purple-50 text-purple-700 hover:bg-purple-100 flex flex-col items-center justify-center gap-2 h-24">
+                        <i class="fas fa-palette text-2xl"></i>
+                        <span class="font-bold">Seni Budaya</span>
+                    </button>
+                </div>
+
+                <!-- Material Detail View -->
+                <div id="materialContent" class="hidden animate-fade-in">
+
+                    <!-- Progress Bar -->
+                    <div class="mb-6">
+                        <div class="flex justify-between text-xs font-semibold text-gray-500 mb-1">
+                            <span>Progress Materi</span>
+                            <span id="progressText">0% Selesai</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div id="progressBar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+                                style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- RECOMMENDATION BOX (NEW FEATURE) -->
+                    <div id="recommendationBox" class="mb-6">
+                        <!-- Injected by JS -->
+                    </div>
+
+                    <div class="flex items-center justify-between mb-2 mt-6">
+                        <h3 class="text-md font-bold text-gray-700">Daftar Semua Topik</h3>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                        <ul id="topicList" class="divide-y divide-gray-100">
+                            <!-- Topic items will be injected here -->
+                        </ul>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <p class="text-xs text-gray-400 italic">Klik topik untuk menandai sebagai "Sudah Dipelajari"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center text-gray-400 text-sm">
+            <p>&copy; 2024 Kelas 5A - Aplikasi Digital</p>
+        </div>
+
+        <!-- Toast Notification -->
+        <div id="toast"
+            class="fixed bottom-5 right-5 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 flex items-center z-50">
+            <i class="fas fa-info-circle mr-3 text-blue-400"></i>
+            <span id="toastMessage">Pesan notifikasi</span>
+        </div>
+
+    </main>
+
+    <script>
+        // --- DATA SISWA ---
+        const students = [
+            "Adam", "Aisyah", "Akila", "Aldo", "Nino",
+            "Rara", "Bilqis", "Rani", "Dhea", "Dave",
+            "Desar", "Fillio", "Maher", "Denis", "Mona",
+            "Alfatih", "Al Jabbar", "Fathan", "Azzam", "Ubaid",
+            "Nyimas", "Rendra", "Shafa", "Fahira"
+        ];
+
+        // --- DATA MATERI (DATABASE) ---
+        const subjectData = {
+            'IPAS': {
+                title: 'IPAS (Ilmu Pengetahuan Alam & Sosial)',
+                topics: [
+                    { id: 1, text: "Bab 1: Melihat karena Cahaya, Mendengar karena Bunyi" },
+                    { id: 2, text: "Bab 2: Harmoni dalam Ekosistem (Rantai Makanan)" },
+                    { id: 3, text: "Bab 3: Magnet, Listrik, dan Teknologi untuk Kehidupan" },
+                    { id: 4, text: "Bab 4: Ayo Berkenalan dengan Bumi Kita (Struktur Bumi)" },
+                    { id: 5, text: "Bab 5: Bagaimana Kita Bernapas & Mencerna Makanan?" },
+                    { id: 6, text: "Bab 6: Indonesia Kaya Raya (SDA & Keanekaragaman Hayati)" },
+                    { id: 7, text: "Bab 7: Daerahku Kebanggaanku (Potensi Daerah)" },
+                    { id: 8, text: "Bab 8: Bumiku Sayang, Bumiku Malang (Lingkungan)" }
+                ]
+            },
+            'MATEMATIKA': {
+                title: 'Matematika',
+                topics: [
+                    { id: 1, text: "Bab 1: Bilangan Cacah sampai 100.000" },
+                    { id: 2, text: "Bab 2: KPK dan FPB" },
+                    { id: 3, text: "Bab 3: Bilangan Pecahan (Penjumlahan & Pengurangan)" },
+                    { id: 4, text: "Bab 4: Keliling Bangun Datar" },
+                    { id: 5, text: "Bab 5: Luas Daerah Bangun Datar" },
+                    { id: 6, text: "Bab 6: Sudut (Mengukur & Melukis Sudut)" },
+                    { id: 7, text: "Bab 7: Membandingkan Ciri-Ciri Bangun Datar" },
+                    { id: 8, text: "Bab 8: Data (Membaca & Menyajikan Data)" }
+                ]
+            },
+            'BINDONESIA': {
+                title: 'Bahasa Indonesia',
+                topics: [
+                    { id: 1, text: "Bab 1: Aku yang Unik (Kata Sifat & Sinonim)" },
+                    { id: 2, text: "Bab 2: Buku Jendela Dunia (Unsur Intrisik Cerita)" },
+                    { id: 3, text: "Bab 3: Ekspresi Diri Melalui Hobi (Imbuhan me-, kan-)" },
+                    { id: 4, text: "Bab 4: Belajar Berwirausaha (Wawancara)" },
+                    { id: 5, text: "Bab 5: Menjadi Warga Dunia (Singkatan & Akronim)" },
+                    { id: 6, text: "Bab 6: Cinta Indonesia (Pengumuman & Iklan)" },
+                    { id: 7, text: "Bab 7: Sayangi Bumi (Teks Eksposisi)" },
+                    { id: 8, text: "Bab 8: Bergerak Bersama (Pantun & Pidato)" }
+                ]
+            },
+            'SEJARAH': {
+                title: 'Sejarah (IPS)',
+                topics: [
+                    { id: 1, text: "Masa Kerajaan Hindu-Buddha di Indonesia" },
+                    { id: 2, text: "Masa Kerajaan Islam di Indonesia" },
+                    { id: 3, text: "Perjuangan Melawan Penjajah (Belanda & Jepang)" },
+                    { id: 4, text: "Persiapan Kemerdekaan Indonesia (BPUPKI/PPKI)" },
+                    { id: 5, text: "Peristiwa Proklamasi 17 Agustus 1945" },
+                    { id: 6, text: "Tokoh-Tokoh Pahlawan Nasional" },
+                    { id: 7, text: "Peninggalan Sejarah di Lingkungan Setempat" }
+                ]
+            },
+            'BJAWA': {
+                title: 'Bahasa Jawa',
+                topics: [
+                    { id: 1, text: "Wulangan 1: Dolanan Tradisional (Teks Narasi)" },
+                    { id: 2, text: "Wulangan 2: Tembang Macapat (Maskumambang/Mijil)" },
+                    { id: 3, text: "Wulangan 3: Pawarta (Berita Bahasa Jawa)" },
+                    { id: 4, text: "Wulangan 4: Cerita Wayang (Pandawa/Kurawa)" },
+                    { id: 5, text: "Wulangan 5: Aksara Jawa (Pasangan)" },
+                    { id: 6, text: "Wulangan 6: Unggah-Ungguh Basa (Krama Inggil)" },
+                    { id: 7, text: "Wulangan 7: Legendha / Cerita Rakyat" }
+                ]
+            },
+            'SENIBUDAYA': {
+                title: 'Seni Budaya & Prakarya',
+                topics: [
+                    { id: 1, text: "Seni Rupa: Menggambar Ilustrasi & Prinsip Seni" },
+                    { id: 2, text: "Seni Rupa: Membuat Karya dari Bahan Daur Ulang" },
+                    { id: 3, text: "Seni Musik: Mengenal Tangga Nada & Lagu Daerah" },
+                    { id: 4, text: "Seni Musik: Bermain Alat Musik Ritmis & Melodis" },
+                    { id: 5, text: "Seni Tari: Pola Lantai dalam Tari Kreasi Daerah" },
+                    { id: 6, text: "Seni Tari: Properti Tari dan Maknanya" },
+                    { id: 7, text: "Prakarya: Membuat Topeng Nusantara" },
+                    { id: 8, text: "Prakarya: Teknik Meronce atau Menganyam" }
+                ]
+            }
+        };
+
+        // --- STATE ---
+        let currentDate = new Date().toISOString().split('T')[0];
+        let attendanceData = {};
+        let gradeData = {};
+        let materialProgress = {}; // Format: { 'IPAS': [1, 2, 3] } storing completed topic IDs
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const datePicker = document.getElementById('datePicker');
+            datePicker.value = currentDate;
+            datePicker.max = currentDate;
+
+            loadData();
+            renderAttendanceList();
+            renderGradeList();
+            updateSummary();
+
+            datePicker.addEventListener('change', (e) => {
+                currentDate = e.target.value;
+                loadData();
+                renderAttendanceList();
+                renderGradeList();
+                updateSummary();
+                showToast(`Tanggal diubah ke ${formatDateIndo(currentDate)}`);
+            });
+        });
+
+        // --- TAB SWITCHING ---
+        function switchTab(tabName) {
+            const sections = {
+                'attendance': document.getElementById('attendanceSection'),
+                'grades': document.getElementById('gradeSection'),
+                'materials': document.getElementById('materialSection')
+            };
+            const tabs = {
+                'attendance': document.getElementById('tab-attendance'),
+                'grades': document.getElementById('tab-grades'),
+                'materials': document.getElementById('tab-materials')
+            };
+
+            // Hide all sections, deactivate all tabs
+            Object.keys(sections).forEach(key => sections[key].classList.add('hidden'));
+            Object.keys(tabs).forEach(key => {
+                tabs[key].className = "flex-1 py-3 rounded-t-lg text-center transition-all tab-inactive whitespace-nowrap px-4";
+            });
+
+            // Show selected
+            sections[tabName].classList.remove('hidden');
+            tabs[tabName].className = "flex-1 py-3 rounded-t-lg text-center transition-all tab-active whitespace-nowrap px-4";
+        }
+
+        // --- MATERIAL LOGIC (UPDATED) ---
+        let currentSubjectKey = null;
+
+        function showSubject(subjectKey) {
+            currentSubjectKey = subjectKey;
+            const grid = document.getElementById('subjectGrid');
+            const content = document.getElementById('materialContent');
+            const nav = document.getElementById('materialNav');
+            const titleEl = document.getElementById('navSubjectTitle');
+
+            const data = subjectData[subjectKey];
+            if (!data) return;
+
+            // UI Transitions
+            grid.classList.add('hidden');
+            content.classList.remove('hidden');
+            nav.classList.remove('hidden');
+            titleEl.innerText = data.title;
+
+            renderTopicList(subjectKey);
+        }
+
+        function closeSubject() {
+            document.getElementById('subjectGrid').classList.remove('hidden');
+            document.getElementById('materialContent').classList.add('hidden');
+            document.getElementById('materialNav').classList.add('hidden');
+            currentSubjectKey = null;
+        }
+
+        function renderTopicList(subjectKey) {
+            const listEl = document.getElementById('topicList');
+            const data = subjectData[subjectKey];
+            const completedIds = materialProgress[subjectKey] || [];
+
+            listEl.innerHTML = '';
+
+            // 1. Determine "Next Topic" (First incomplete topic)
+            const nextTopic = data.topics.find(t => !completedIds.includes(t.id));
+
+            // 2. Render Recommendation Box
+            const recBox = document.getElementById('recommendationBox');
+            if (nextTopic) {
+                recBox.innerHTML = `
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg shadow-sm animate-pulse-soft">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-lightbulb text-yellow-400 text-xl mt-1"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-xs font-bold text-blue-600 uppercase tracking-wide">Harus Dibahas Selanjutnya:</p>
+                                <h4 class="text-lg font-bold text-gray-800 mt-1">${nextTopic.text}</h4>
+                                <p class="text-sm text-gray-600 mt-1">Materi ini belum dicentang. Silakan bahas materi ini.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                recBox.innerHTML = `
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg shadow-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 text-2xl mr-3"></i>
+                            <div>
+                                <h4 class="text-lg font-bold text-green-800">Luar Biasa!</h4>
+                                <p class="text-sm text-green-700">Semua materi dalam bab ini sudah selesai dibahas.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 3. Update Progress Bar
+            const total = data.topics.length;
+            const done = completedIds.length;
+            const percent = Math.round((done / total) * 100);
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('progressText').innerText = `${percent}% Selesai`;
+
+            // 4. Render List
+            data.topics.forEach((topic) => {
+                const isDone = completedIds.includes(topic.id);
+                const li = document.createElement('li');
+
+                // Style based on state
+                const bgClass = isDone ? "bg-green-50" : "bg-white hover:bg-gray-50";
+                const textClass = isDone ? "text-gray-500 line-through" : "text-gray-800 font-medium";
+                const iconClass = isDone ? "text-green-500" : "text-gray-200";
+
+                li.className = `p-4 cursor-pointer transition flex items-center group border-b border-gray-100 ${bgClass}`;
+                li.onclick = () => toggleTopic(subjectKey, topic.id);
+
+                li.innerHTML = `
+                    <div class="mr-4 flex-shrink-0">
+                        <i class="fas fa-check-circle text-2xl transition ${iconClass} group-hover:scale-110"></i>
+                    </div>
+                    <div class="flex-1">
+                        <span class="${textClass} transition group-hover:text-blue-600">${topic.text}</span>
+                    </div>
+                    ${!isDone && nextTopic && nextTopic.id === topic.id ? '<span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded font-bold">Next</span>' : ''}
+                `;
+                listEl.appendChild(li);
+            });
+        }
+
+        function toggleTopic(subjectKey, topicId) {
+            if (!materialProgress[subjectKey]) materialProgress[subjectKey] = [];
+
+            const index = materialProgress[subjectKey].indexOf(topicId);
+            if (index > -1) {
+                materialProgress[subjectKey].splice(index, 1); // Remove (Uncheck)
+            } else {
+                materialProgress[subjectKey].push(topicId); // Add (Check)
+            }
+
+            saveMaterials();
+            renderTopicList(subjectKey); // Re-render to update UI & Recommendation
+        }
+
+        // --- DATA MANAGEMENT ---
+        function loadData() {
+            const storedAtt = localStorage.getItem('absensi_5a_data');
+            const storedGrd = localStorage.getItem('nilai_5a_data');
+            const storedMat = localStorage.getItem('materi_5a_data'); // Load Materials
+
+            if (storedAtt) attendanceData = JSON.parse(storedAtt);
+            if (storedGrd) gradeData = JSON.parse(storedGrd);
+            if (storedMat) materialProgress = JSON.parse(storedMat);
+        }
+
+        function saveAttendance() {
+            localStorage.setItem('absensi_5a_data', JSON.stringify(attendanceData));
+            updateSummary();
+        }
+
+        function saveGrades() {
+            localStorage.setItem('nilai_5a_data', JSON.stringify(gradeData));
+        }
+
+        function saveMaterials() {
+            localStorage.setItem('materi_5a_data', JSON.stringify(materialProgress));
+        }
+
+        // --- ATTENDANCE LOGIC ---
+        function getStatus(name) {
+            if (!attendanceData[currentDate]) return null;
+            return attendanceData[currentDate][name] || null;
+        }
+
+        function setStatus(name, status) {
+            if (!attendanceData[currentDate]) attendanceData[currentDate] = {};
+            attendanceData[currentDate][name] = status;
+            saveAttendance();
+            renderAttendanceRow(name);
+        }
+
+        function markAllPresent() {
+            students.forEach(name => {
+                if (!attendanceData[currentDate]) attendanceData[currentDate] = {};
+                attendanceData[currentDate][name] = 'Hadir';
+            });
+            saveAttendance();
+            renderAttendanceList();
+            showToast("Semua siswa ditandai Hadir");
+        }
+
+        // --- GRADE LOGIC ---
+        function getStudentGrade(name) {
+            if (!gradeData[currentDate]) return { b: '', s: '', score: '-' };
+            return gradeData[currentDate][name] || { b: '', s: '', score: '-' };
+        }
+
+        function updateScore(name) {
+            const bInput = document.getElementById(`benar-${name}`);
+            const sInput = document.getElementById(`salah-${name}`);
+            const scoreDisplay = document.getElementById(`score-${name}`);
+
+            const b = parseInt(bInput.value) || 0;
+            const s = parseInt(sInput.value) || 0;
+
+            if (bInput.value === '' && sInput.value === '') {
+                scoreDisplay.innerText = '-';
+                scoreDisplay.className = "text-xl font-bold text-gray-300";
+                if (gradeData[currentDate] && gradeData[currentDate][name]) {
+                    delete gradeData[currentDate][name];
+                    saveGrades();
+                }
+                return;
+            }
+
+            const totalSoal = b + s;
+            let score = 0;
+            if (totalSoal > 0) {
+                score = Math.round((b / totalSoal) * 100);
+            }
+
+            scoreDisplay.innerText = score;
+            if (score >= 80) scoreDisplay.className = "text-xl font-bold text-green-600";
+            else if (score >= 60) scoreDisplay.className = "text-xl font-bold text-blue-600";
+            else scoreDisplay.className = "text-xl font-bold text-red-500";
+
+            if (!gradeData[currentDate]) gradeData[currentDate] = {};
+            gradeData[currentDate][name] = { b: bInput.value, s: sInput.value, score: score };
+            saveGrades();
+        }
+
+        function resetToday(type) {
+            if (confirm(`Yakin ingin mereset data ${type === 'attendance' ? 'absensi' : 'nilai'} hari ini?`)) {
+                if (type === 'attendance') {
+                    if (attendanceData[currentDate]) delete attendanceData[currentDate];
+                    saveAttendance();
+                    renderAttendanceList();
+                } else {
+                    if (gradeData[currentDate]) delete gradeData[currentDate];
+                    saveGrades();
+                    renderGradeList();
+                }
+                showToast("Data berhasil di-reset");
+            }
+        }
+
+        // --- RENDERING ---
+        function renderAttendanceList() {
+            const container = document.getElementById('studentList');
+            container.innerHTML = '';
+            students.forEach((name, index) => {
+                const div = document.createElement('div');
+                div.id = `row-${name}`;
+                div.className = 'student-card p-3 md:flex items-center hover:bg-blue-50';
+                div.innerHTML = generateAttHTML(name, index);
+                container.appendChild(div);
+            });
+        }
+
+        function renderAttendanceRow(name) {
+            const row = document.getElementById(`row-${name}`);
+            if (row) {
+                row.innerHTML = generateAttHTML(name, students.indexOf(name));
+            }
+        }
+
+        function generateAttHTML(name, index) {
+            const currentStatus = getStatus(name);
+            const buttons = [
+                { id: 'Hadir', color: 'green', icon: 'fa-check', label: 'H' },
+                { id: 'Sakit', color: 'yellow', icon: 'fa-procedures', label: 'S' },
+                { id: 'Izin', color: 'blue', icon: 'fa-envelope', label: 'I' },
+                { id: 'Alpha', color: 'red', icon: 'fa-times', label: 'A' },
+            ];
+            let buttonsHTML = `<div class="flex gap-2 justify-center md:justify-end mt-2 md:mt-0">`;
+            buttons.forEach(btn => {
+                const isActive = currentStatus === btn.id;
+                const activeClass = isActive
+                    ? `bg-${btn.color}-500 text-white shadow-md transform scale-105 ring-2 ring-${btn.color}-300`
+                    : `bg-white text-gray-500 border border-gray-200 hover:bg-${btn.color}-50`;
+                buttonsHTML += `
+                    <button onclick="setStatus('${name}', '${btn.id}')" 
+                        class="${activeClass} w-10 h-10 md:w-24 md:h-10 rounded-lg transition duration-200 flex items-center justify-center gap-1 group" title="${btn.id}">
+                        <i class="fas ${btn.icon}"></i>
+                        <span class="hidden md:inline text-sm font-medium">${btn.id}</span>
+                        <span class="md:hidden text-xs font-bold">${btn.label}</span>
+                    </button>
+                `;
+            });
+            buttonsHTML += `</div>`;
+
+            let statusIndicator = '';
+            if (currentStatus) {
+                const colorMap = { 'Hadir': 'bg-green-500', 'Sakit': 'bg-yellow-500', 'Izin': 'bg-blue-500', 'Alpha': 'bg-red-500' };
+                statusIndicator = `<div class="absolute left-0 top-0 bottom-0 w-1 ${colorMap[currentStatus]} rounded-l-lg"></div>`;
+            }
+
+            return `
+                ${statusIndicator}
+                <div class="md:w-10 text-center font-bold text-gray-400 mb-1 md:mb-0">${index + 1}.</div>
+                <div class="flex-1 font-semibold text-gray-800 text-lg md:text-base pl-2 md:pl-0">
+                    ${name}
+                    ${currentStatus ? `<span class="md:hidden ml-2 text-xs px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">${currentStatus}</span>` : ''}
+                </div>
+                <div class="flex-1">${buttonsHTML}</div>
+            `;
+        }
+
+        function renderGradeList() {
+            const container = document.getElementById('gradeList');
+            container.innerHTML = '';
+            students.forEach((name, index) => {
+                const data = getStudentGrade(name);
+                const div = document.createElement('div');
+                div.className = 'p-3 flex items-center hover:bg-gray-50 border-b border-gray-100';
+                let scoreClass = "text-gray-300";
+                if (data.score !== '-') {
+                    if (data.score >= 80) scoreClass = "text-green-600";
+                    else if (data.score >= 60) scoreClass = "text-blue-600";
+                    else scoreClass = "text-red-500";
+                }
+                div.innerHTML = `
+                    <div class="w-8 md:w-10 text-center font-bold text-gray-400">${index + 1}.</div>
+                    <div class="w-32 md:flex-1 font-semibold text-gray-800">${name}</div>
+                    <div class="flex-1 grid grid-cols-3 gap-2 items-center">
+                        <input type="number" id="benar-${name}" value="${data.b}" min="0" 
+                            class="w-full p-2 border border-green-200 rounded-lg text-center bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-400 font-bold text-green-700 placeholder-green-200"
+                            placeholder="0" oninput="updateScore('${name}')">
+                        <input type="number" id="salah-${name}" value="${data.s}" min="0" 
+                            class="w-full p-2 border border-red-200 rounded-lg text-center bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-400 font-bold text-red-700 placeholder-red-200"
+                            placeholder="0" oninput="updateScore('${name}')">
+                        <div class="text-center"><span id="score-${name}" class="text-xl font-bold ${scoreClass}">${data.score}</span></div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateSummary() {
+            if (!attendanceData[currentDate]) {
+                ['countHadir', 'countSakit', 'countIzin', 'countAlpha'].forEach(id => document.getElementById(id).innerText = 0);
+                return;
+            }
+            const data = attendanceData[currentDate];
+            const counts = { Hadir: 0, Sakit: 0, Izin: 0, Alpha: 0 };
+            Object.values(data).forEach(s => { if (counts[s] !== undefined) counts[s]++; });
+            document.getElementById('countHadir').innerText = counts.Hadir;
+            document.getElementById('countSakit').innerText = counts.Sakit;
+            document.getElementById('countIzin').innerText = counts.Izin;
+            document.getElementById('countAlpha').innerText = counts.Alpha;
+        }
+
+        function formatDateIndo(dateString) {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('id-ID', options);
+        }
+
+        function copyAttendanceToClipboard() {
+            if (!attendanceData[currentDate]) { showToast("Belum ada data absensi!"); return; }
+            let text = `*ABSENSI 5A - ${formatDateIndo(currentDate)}*\n----------------\n`;
+            let h = 0, s = [], i = [], a = [];
+            students.forEach(name => {
+                const st = attendanceData[currentDate][name];
+                if (st === 'Hadir') h++;
+                else if (st === 'Sakit') s.push(name);
+                else if (st === 'Izin') i.push(name);
+                else if (st === 'Alpha') a.push(name);
+            });
+            text += `✅ Hadir: ${h}\n`;
+            if (s.length) text += `😷 Sakit: ${s.join(', ')}\n`;
+            if (i.length) text += `📩 Izin: ${i.join(', ')}\n`;
+            if (a.length) text += `❌ Alpha: ${a.join(', ')}\n`;
+            text += `----------------`;
+            navigator.clipboard.writeText(text);
+            showToast("Laporan Absensi Disalin!");
+        }
+
+        function copyGradesToClipboard() {
+            if (!gradeData[currentDate]) { showToast("Belum ada data nilai!"); return; }
+            let text = `*DAFTAR NILAI KELAS 5A*\n📅 ${formatDateIndo(currentDate)}\n----------------\n`;
+            let hasData = false;
+            students.forEach((name, idx) => {
+                const d = gradeData[currentDate][name];
+                if (d && d.score !== '-') {
+                    hasData = true;
+                    text += `${idx + 1}. ${name} : *${d.score}* (B:${d.b}, S:${d.s})\n`;
+                }
+            });
+            if (!hasData) { showToast("Data nilai masih kosong."); return; }
+            text += `----------------\nSemangat Belajar! 💪`;
+            navigator.clipboard.writeText(text);
+            showToast("Laporan Nilai Disalin!");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+        }
+    </script>
+</body>
+
+</html>
